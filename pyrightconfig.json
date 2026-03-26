@@ -2,7 +2,9 @@
     "venvPath": ".",
     "venv": ".venv",
     "pythonVersion": "3.12",
+    "typeCheckingMode": "off",
     "executionEnvironments": [
-        { "root": "src" }
+        { "root": "src" },
+        { "root": "tests", "extraPaths": ["src"] }
     ]
 }

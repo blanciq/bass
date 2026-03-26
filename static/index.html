@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bass — AI Banking Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            900: '#0c1220',
+                            800: '#151e30',
+                            700: '#1a2740',
+                            600: '#1e2d45',
+                        },
+                        gold: {
+                            500: '#d4a44a',
+                            400: '#e0b96a',
+                            100: 'rgba(212, 164, 74, 0.12)',
+                        },
+                        muted: '#8899b4',
+                        bright: '#c8d5e6',
+                    },
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                },
+            },
+        }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* Scrollbar styling — not possible with Tailwind */
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: #1e2d45; border-radius: 4px; }
+        .chat-scroll::-webkit-scrollbar { width: 5px; }
+        .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+        /* Message animation */
+        @keyframes msgIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .msg-animate { animation: msgIn 0.25s ease-out; }
+
+        /* Typing dots */
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-4px); opacity: 0.8; }
+        }
+        .typing-dot { animation: typingBounce 1.2s infinite; }
+        .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+    </style>
+</head>
+<body class="h-screen overflow-hidden font-sans bg-gray-50 text-gray-800">
+    <div class="flex h-screen" x-data="chatApp()" x-init="init()">
+
+        <!-- Sidebar -->
+        <aside class="w-[300px] min-w-[300px] bg-navy-900 flex flex-col border-r border-navy-600 relative overflow-hidden">
+            <!-- Subtle glow -->
+            <div class="absolute top-0 left-0 right-0 h-48 bg-[radial-gradient(ellipse_at_30%_0%,rgba(212,164,74,0.06)_0%,transparent_70%)] pointer-events-none"></div>
+
+            <!-- Header -->
+            <div class="relative z-10 p-5 pb-4 border-b border-navy-600">
+                <div class="flex items-center gap-2.5 mb-5">
+                    <div class="w-9 h-9 bg-gradient-to-br from-gold-500 to-amber-700 rounded-[10px] flex items-center justify-center font-semibold text-sm text-navy-900 shadow-[0_2px_12px_rgba(212,164,74,0.25)]">B</div>
+                    <div>
+                        <div class="text-lg font-semibold text-bright leading-tight">Bass</div>
+                        <div class="text-[11px] text-muted tracking-wider uppercase font-medium">Banking Assistant</div>
+                    </div>
+                </div>
+                <button class="w-full py-2.5 px-4 bg-transparent border border-dashed border-navy-600 rounded-[10px] text-muted text-[13.5px] font-medium cursor-pointer flex items-center gap-2 transition-all hover:border-gold-500 hover:text-gold-500 hover:bg-gold-100"
+                        @click="createConversation()">
+                    <svg class="w-4 h-4 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    New conversation
+                </button>
+            </div>
+
+            <!-- Conversation list -->
+            <div class="flex-1 overflow-y-auto p-2 relative z-10 sidebar-scroll">
+                <template x-for="conv in conversations" :key="conv.id">
+                    <div class="group flex items-center py-3 px-3.5 rounded-[10px] cursor-pointer transition-all mb-0.5"
+                         :class="activeId === conv.id ? 'bg-navy-700' : 'hover:bg-navy-800'"
+                         @click="selectConversation(conv.id)">
+                        <div class="w-1.5 h-1.5 rounded-full bg-gold-500 mr-3 flex-shrink-0 transition-opacity"
+                             :class="activeId === conv.id ? 'opacity-100' : 'opacity-0'"></div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[13.5px] font-medium truncate transition-colors"
+                                 :class="activeId === conv.id ? 'text-bright' : 'text-muted group-hover:text-bright'"
+                                 x-text="conv.title || 'Conversation'"></div>
+                            <div class="text-[11px] text-muted/50 mt-0.5 font-mono tracking-tight" x-text="conv.id.substring(0, 8)"></div>
+                        </div>
+                        <button class="p-1 rounded-md opacity-0 group-hover:opacity-50 hover:!opacity-100 hover:text-red-400 hover:bg-red-400/10 transition-all flex-shrink-0 text-muted"
+                                @click.stop="deleteConversation(conv.id)">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Footer -->
+            <div class="relative z-10 py-4 px-5 border-t border-navy-600">
+                <div class="text-[11px] text-muted/40 text-center tracking-wider">Bass v0.1</div>
+            </div>
+        </aside>
+
+        <!-- Main Panel -->
+        <main class="flex-1 flex flex-col min-w-0 relative">
+
+            <!-- Empty: no conversations -->
+            <div class="flex-1 flex flex-col items-center justify-center p-10" x-show="conversations.length === 0">
+                <div class="w-[72px] h-[72px] rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center mb-6 shadow-[0_4px_20px_rgba(212,164,74,0.15)]">
+                    <svg class="w-8 h-8 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div class="text-xl font-semibold text-gray-800 mb-2">Welcome to Bass</div>
+                <div class="text-sm text-gray-500 mb-7 text-center leading-relaxed">Your AI banking assistant.<br>Start a conversation to begin.</div>
+                <button class="py-3 px-7 bg-navy-900 text-white rounded-[10px] text-sm font-medium cursor-pointer flex items-center gap-2 transition-all shadow-[0_2px_12px_rgba(12,18,32,0.2)] hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(12,18,32,0.3)]"
+                        @click="createConversation()">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    New conversation
+                </button>
+            </div>
+
+            <!-- Empty: has conversations but none selected -->
+            <div class="flex-1 flex flex-col items-center justify-center p-10" x-show="conversations.length > 0 && !activeId">
+                <div class="w-[72px] h-[72px] rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center mb-6 shadow-[0_4px_20px_rgba(212,164,74,0.15)]">
+                    <svg class="w-8 h-8 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M15 10l-4 4l6 6l4-16l-18 7l4 2l2 6l3-4"/></svg>
+                </div>
+                <div class="text-xl font-semibold text-gray-800 mb-2">Select a conversation</div>
+                <div class="text-sm text-gray-500 mb-7 text-center leading-relaxed">Choose a conversation from the sidebar<br>or start a new one.</div>
+                <button class="py-3 px-7 bg-navy-900 text-white rounded-[10px] text-sm font-medium cursor-pointer flex items-center gap-2 transition-all shadow-[0_2px_12px_rgba(12,18,32,0.2)] hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(12,18,32,0.3)]"
+                        @click="createConversation()">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    New conversation
+                </button>
+            </div>
+
+            <!-- Active chat -->
+            <template x-if="activeConversation">
+                <div class="flex flex-col h-full">
+                    <!-- Empty conversation: centered input -->
+                    <div class="flex-1 flex flex-col items-center justify-center px-6" x-show="activeConversation.messages.length === 0 && !sending">
+                        <div class="w-[72px] h-[72px] rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center mb-6 shadow-[0_4px_20px_rgba(212,164,74,0.15)]">
+                            <svg class="w-8 h-8 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </div>
+                        <div class="text-xl font-semibold text-gray-800 mb-2">How can I help you?</div>
+                        <div class="text-sm text-gray-500 mb-7 text-center leading-relaxed">Ask me anything about your banking needs.</div>
+                        <div class="w-full max-w-[720px]">
+                            <div class="flex gap-2.5 bg-gray-50 border-[1.5px] border-gray-300 rounded-[14px] py-1.5 pr-1.5 pl-4 items-end transition-all focus-within:border-gold-500 focus-within:shadow-[0_0_0_3px_rgba(212,164,74,0.12)]">
+                                <textarea class="flex-1 border-none outline-none font-sans text-sm text-gray-800 bg-transparent resize-none min-h-[24px] max-h-[120px] py-2 leading-relaxed placeholder:text-gray-400/50"
+                                          x-model="messageInput"
+                                          @keydown.enter.prevent="sendMessage()"
+                                          placeholder="Message Bass..."
+                                          rows="1"
+                                          @input="autoResize($event)"></textarea>
+                                <button class="w-10 h-10 rounded-[10px] bg-navy-900 text-white flex items-center justify-center flex-shrink-0 transition-all hover:bg-navy-700 hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                        :disabled="!messageInput.trim() || sending"
+                                        @click="sendMessage()">
+                                    <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Messages (shown when conversation has messages) -->
+                    <div class="flex-1 overflow-y-auto chat-scroll" x-ref="messagesContainer" x-show="activeConversation.messages.length > 0 || sending">
+                        <div class="max-w-[720px] mx-auto px-6 pt-24 pb-7 flex flex-col gap-1.5">
+                            <template x-for="msg in activeConversation.messages" :key="msg.id">
+                                <div class="flex gap-3 max-w-[85%] msg-animate"
+                                     :class="msg.role === 'user' ? 'self-start' : 'self-end flex-row-reverse'">
+                                    <div class="w-8 h-8 rounded-[10px] flex items-center justify-center text-[13px] font-semibold flex-shrink-0 mt-0.5"
+                                         :class="msg.role === 'user' ? 'bg-navy-900 text-gold-500' : 'bg-gradient-to-br from-amber-100 to-amber-200 text-amber-800'"
+                                         x-text="msg.role === 'user' ? 'Y' : 'B'"></div>
+                                    <div>
+                                        <div class="py-3 px-4 rounded-[14px] text-sm leading-relaxed"
+                                             :class="msg.role === 'user'
+                                                 ? 'bg-white text-gray-800 border border-gray-200 rounded-bl-sm'
+                                                 : 'bg-navy-900 text-gray-200 rounded-br-sm'"
+                                             x-text="msg.content"></div>
+                                        <div class="text-[10px] text-gray-400/50 mt-1 font-mono"
+                                             :class="msg.role === 'user' ? '' : 'text-right'"
+                                             x-text="formatTime(msg.created_at)"></div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Typing indicator -->
+                            <div class="flex gap-3 self-end flex-row-reverse msg-animate" x-show="sending">
+                                <div class="w-8 h-8 rounded-[10px] bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center text-[13px] font-semibold text-amber-800">B</div>
+                                <div class="py-3 px-4 rounded-[14px] rounded-br-sm bg-navy-900">
+                                    <div class="flex gap-1 py-0.5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400 opacity-40 typing-dot"></span>
+                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400 opacity-40 typing-dot"></span>
+                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400 opacity-40 typing-dot"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom input (shown when conversation has messages) -->
+                    <div class="border-t border-gray-200 bg-white px-6 pt-4 pb-6" x-show="activeConversation.messages.length > 0 || sending">
+                        <div class="max-w-[720px] mx-auto">
+                            <div class="flex gap-2.5 bg-gray-50 border-[1.5px] border-gray-300 rounded-[14px] py-1.5 pr-1.5 pl-4 items-end transition-all focus-within:border-gold-500 focus-within:shadow-[0_0_0_3px_rgba(212,164,74,0.12)]">
+                                <textarea class="flex-1 border-none outline-none font-sans text-sm text-gray-800 bg-transparent resize-none min-h-[24px] max-h-[120px] py-2 leading-relaxed placeholder:text-gray-400/50"
+                                          x-model="messageInput"
+                                          @keydown.enter.prevent="sendMessage()"
+                                          placeholder="Message Bass..."
+                                          rows="1"
+                                          @input="autoResize($event)"></textarea>
+                                <button class="w-10 h-10 rounded-[10px] bg-navy-900 text-white flex items-center justify-center flex-shrink-0 transition-all hover:bg-navy-700 hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                        :disabled="!messageInput.trim() || sending"
+                                        @click="sendMessage()">
+                                    <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
