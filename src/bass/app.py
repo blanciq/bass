@@ -15,7 +15,7 @@ STATIC_DIR = Path(__file__).resolve().parent.parent.parent / "static"
 def create_app() -> FastAPI:
     app = FastAPI(title="Bass")
 
-    settings = Settings()
+    settings = Settings()  # type: ignore[call-arg]  # pydantic-settings loads from .env
 
     storage = ConversationsStorage()
     llm_service = LlmService(api_key=settings.anthropic_api_key)

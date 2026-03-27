@@ -23,7 +23,9 @@ class ConversationService:
         return self._storage.delete(conversation_id)
 
     def send_message(self, conversation_id: str, content: str) -> Message:
-        chat = self._storage.add_message(conversation_id, Message(role=Role.USER, content=content))
+        chat = self._storage.add_message(
+            conversation_id, Message(role=Role.USER, content=content)
+        )
         response = self._llm_service.generate_response(chat)
         self._storage.add_message(conversation_id, response)
         return response

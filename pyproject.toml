@@ -27,8 +27,18 @@ select = ["E", "F", "I", "N", "UP"]
                                                                                                                                                                     
 [tool.mypy]
 python_version = "3.12"
-strict = true
-mypy_path = "src"                                                                                                                                                        
+mypy_path = "src"
+
+# Core strictness (production-grade)
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true          # All functions must have types
+disallow_any_generics = true          # list[Any] is an error
+no_implicit_optional = true           # Optional must be explicit
+warn_unused_ignores = true            # Clean up unnecessary ignores
+
+# Pragmatic relaxations
+allow_untyped_decorators = true       # FastAPI decorators often untyped                                                                                                                                                        
 
 [tool.pytest.ini_options]                                                                                                                                            
 testpaths = ["tests"]
