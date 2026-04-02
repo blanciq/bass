@@ -1,0 +1,42 @@
+[
+  {
+    "content": "The Premium Checking Account has a monthly maintenance fee of $12, which is waived when you maintain a minimum daily balance of $1,500 or have combined monthly deposits of $5,000 or more. This account includes a free Visa debit card, unlimited transactions, and complimentary cashier's checks. Overdraft protection is available at $35 per occurrence. There are no foreign transaction fees when using your debit card abroad.",
+    "metadata": {"source": "products/checking_accounts"}
+  },
+  {
+    "content": "Our Basic Checking Account is designed for everyday banking with no monthly fee when you set up a direct deposit of $500 or more. Without qualifying direct deposit, a $5 monthly maintenance fee applies. This account allows up to 20 debit card transactions per month. ATM withdrawals are free at any of our 3,000+ network ATMs, while out-of-network ATM withdrawals carry a $2.50 surcharge.",
+    "metadata": {"source": "products/checking_accounts"}
+  },
+  {
+    "content": "The Premium Savings Account offers a highly competitive 4.5% annual percentage yield (APY) on balances up to $250,000. Balances above $250,000 earn 3.8% APY. There is no minimum balance required to open or maintain this account, and there is no monthly maintenance fee. Interest is compounded daily and credited to your account monthly. Per federal regulation, you may make up to 6 withdrawals per month.",
+    "metadata": {"source": "products/savings_accounts"}
+  },
+  {
+    "content": "The Basic Savings Account earns 1.2% APY and requires a minimum balance of $500. If your balance falls below the minimum, a $3 monthly maintenance fee will apply. Interest is compounded and credited monthly. You may make unlimited deposits and up to 6 withdrawals per month. This account is also available for minors aged 13 and older with a parental co-signer.",
+    "metadata": {"source": "products/savings_accounts"}
+  },
+  {
+    "content": "The Platinum Credit Card has no annual fee and earns 2% cashback on every purchase with no category restrictions. New cardholders enjoy a 0% introductory APR for the first 15 months on both purchases and balance transfers. After the introductory period, the variable APR ranges from 18.99% to 24.99% based on your creditworthiness. A minimum credit score of 700 is required to apply. Credit limits range from $5,000 to $50,000.",
+    "metadata": {"source": "products/credit_cards"}
+  },
+  {
+    "content": "The Gold Credit Card carries a $95 annual fee and rewards you with 3% cashback on dining and travel purchases, and 1% cashback on all other spending. New cardholders can earn 50,000 bonus points after spending $3,000 within the first 3 months of account opening. The card includes complimentary travel insurance and charges no foreign transaction fees. A minimum credit score of 680 is required.",
+    "metadata": {"source": "products/credit_cards"}
+  },
+  {
+    "content": "Our Fixed-Rate Home Loan offers predictable monthly payments with rates starting at 6.25% APR for a 30-year term and 5.75% APR for a 15-year term. A minimum down payment of 10% is required, though borrowers who put down as little as 3.5% may qualify with private mortgage insurance (PMI) at approximately $85 per month for every $100,000 borrowed. Closing costs typically range from 2% to 5% of the total loan amount. The maximum loan amount is $750,000 and mortgage pre-approval is valid for 90 days.",
+    "metadata": {"source": "products/home_loans"}
+  },
+  {
+    "content": "The Adjustable-Rate Mortgage (ARM) starts with an introductory rate of 5.25% APR that remains fixed for the first 5 years. After the initial period, the rate adjusts annually with a cap of 2% per adjustment and a 6% lifetime cap above the starting rate. This mortgage is available for loan amounts up to $1,000,000 with a minimum down payment of 15%. Borrowers have the option to refinance into a fixed-rate mortgage at any point after the initial fixed period.",
+    "metadata": {"source": "products/home_loans"}
+  },
+  {
+    "content": "If you suspect fraud or notice unauthorized transactions on your account, please contact our 24/7 fraud hotline immediately at 1-800-555-FRAUD. You can also freeze your debit or credit card instantly through the mobile banking app by navigating to Card Controls. Our zero liability guarantee means you will not be held responsible for unauthorized transactions reported within 60 days of the statement date. Fraud investigations are typically completed within 10 business days.",
+    "metadata": {"source": "policies/fraud_reporting"}
+  },
+  {
+    "content": "Wire transfers can be initiated online, by phone, or at any branch. Domestic incoming wire transfers are free of charge. Domestic outgoing transfers cost $25, international incoming transfers cost $15, and international outgoing transfers cost $45. Domestic transfers are processed same-day when submitted before 3:00 PM Eastern Time. International transfers typically take 2 to 4 business days to complete. Please note that wire transfers cannot be reversed once they have been processed.",
+    "metadata": {"source": "products/transfers"}
+  }
+]

@@ -8,7 +8,9 @@ class LlmService:
     def __init__(self, api_key: str) -> None:
         self._client = Anthropic(api_key=api_key)
 
-    def generate_response(self, chat: list[Message]) -> Message:
+    def generate_response(
+        self, chat: list[Message], system: str | None = None
+    ) -> Message:
         messages: list[MessageParam] = [
             {"role": msg.role.value, "content": msg.content} for msg in chat
         ]
@@ -16,8 +18,8 @@ class LlmService:
             model="claude-sonnet-4-20250514",
             max_tokens=1024,
             messages=messages,
+            system=system or "",
         )
-        # Type-safe way to access text content
         first_block = response.content[0]
         if isinstance(first_block, TextBlock):
             content = first_block.text
